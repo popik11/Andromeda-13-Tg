@@ -15,21 +15,21 @@ GLOBAL_VAR_INIT(normal_ooc_colour, "#002eb8")
 		if(!client_initalized)
 			unvalidated_client_error() // we only want to throw this warning message when it's directly related to client failure.
 
-		to_chat(usr, span_warning("Failed to send your OOC message. You attempted to send the following message:\n[span_big(msg)]"))
+		to_chat(usr, span_warning("Не удалось отправить ваше OOC сообщение. Вы пытались отправить следующее сообщение:\n[span_big(msg)]"))
 		return
 
 	if(isnull(holder))
 		if(!GLOB.ooc_allowed)
-			to_chat(src, span_danger("OOC is globally muted."))
+			to_chat(src, span_danger("OOC замьютили везде."))
 			return
 		if(!GLOB.dooc_allowed && (mob.stat == DEAD))
-			to_chat(usr, span_danger("OOC for dead mobs has been turned off."))
+			to_chat(usr, span_danger("OOC для мертвых функция отключена."))
 			return
 		if(prefs.muted & MUTE_OOC)
-			to_chat(src, span_danger("You cannot use OOC (muted)."))
+			to_chat(src, span_danger("Вы не можете использовать OOC (замьютили)."))
 			return
 	if(is_banned_from(ckey, "OOC"))
-		to_chat(src, span_danger("You have been banned from OOC."))
+		to_chat(src, span_danger("Вам был запрещен доступ в OOC."))
 		return
 	if(QDELETED(src))
 		return
@@ -48,31 +48,31 @@ GLOBAL_VAR_INIT(normal_ooc_colour, "#002eb8")
 	var/list/soft_filter_result = filter_result || is_soft_ooc_filtered(msg)
 
 	if (soft_filter_result)
-		if(tgui_alert(usr,"Your message contains \"[soft_filter_result[CHAT_FILTER_INDEX_WORD]]\". \"[soft_filter_result[CHAT_FILTER_INDEX_REASON]]\", Are you sure you want to say it?", "Soft Blocked Word", list("Yes", "No")) != "Yes")
+		if(tgui_alert(usr,"Ваше сообщение содержит \"[soft_filter_result[CHAT_FILTER_INDEX_WORD]]\". \"[soft_filter_result[CHAT_FILTER_INDEX_REASON]]\", вы уверены, что хотите это сказать?", "Soft Blocked Word", list("Да", "Нет")) != "Да")
 			return
-		message_admins("[ADMIN_LOOKUPFLW(usr)] has passed the soft filter for \"[soft_filter_result[CHAT_FILTER_INDEX_WORD]]\" they may be using a disallowed term. Message: \"[msg]\"")
-		log_admin_private("[key_name(usr)] has passed the soft filter for \"[soft_filter_result[CHAT_FILTER_INDEX_WORD]]\" they may be using a disallowed term. Message: \"[msg]\"")
+		message_admins("[ADMIN_LOOKUPFLW(usr)] прошел мягкий фильтр для \"[soft_filter_result[CHAT_FILTER_INDEX_WORD]]\" возможно, оно использует банворд. Сообщение: \"[msg]\"")
+		log_admin_private("[key_name(usr)] прошел мягкий фильтр для \"[soft_filter_result[CHAT_FILTER_INDEX_WORD]]\" возможно, оно использует банворд. Сообщение: \"[msg]\"")
 
 	if(!msg)
 		return
 
 	msg = emoji_parse(msg)
 
-	if(SSticker.HasRoundStarted() && ((msg[1] in list(".",";",":","#")) || findtext_char(msg, "say", 1, 5)))
-		if(tgui_alert(usr,"Your message \"[raw_msg]\" looks like it was meant for in game communication, say it in OOC?", "Meant for OOC?", list("Yes", "No")) != "Yes")
+	if(SSticker.HasRoundStarted() && ((msg[1] in list(".",";",":","#")) || findtext_char(msg, "сказать", 1, 5)))
+		if(tgui_alert(usr,"Ваше сообщение \"[raw_msg]\" похоже, это было предназначено для общения в игре, сказать это в OOC?", "Предназначен для OOC?", list("Да", "Нет")) != "Да")
 			return
 
 	if(!holder)
 		if(handle_spam_prevention(msg,MUTE_OOC))
 			return
 		if(findtext(msg, "byond://"))
-			to_chat(src, span_boldannounce("Advertising other servers is not allowed."))
-			log_admin("[key_name(src)] has attempted to advertise in OOC: [msg]")
-			message_admins("[key_name_admin(src)] has attempted to advertise in OOC: [msg]")
+			to_chat(src, span_boldannounce("Реклама других серверов запрещена."))
+			log_admin("[key_name(src)] попытался разместить рекламу в OOC: [msg]")
+			message_admins("[key_name_admin(src)] попытался разместить рекламу в OOC: [msg]")
 			return
 
 	if(!(get_chat_toggles(src) & CHAT_OOC))
-		to_chat(src, span_danger("You have OOC muted."))
+		to_chat(src, span_danger("Вас замьютили в OOC."))
 		return
 
 	mob.log_talk(raw_msg, LOG_OOC)
@@ -121,7 +121,7 @@ GLOBAL_VAR_INIT(normal_ooc_colour, "#002eb8")
 			return
 	else //otherwise just toggle it
 		GLOB.ooc_allowed = !GLOB.ooc_allowed
-	to_chat(world, "<span class='oocplain'><B>The OOC channel has been globally [GLOB.ooc_allowed ? "enabled" : "disabled"].</B></span>")
+	to_chat(world, "<span class='oocplain'><B>OOC чат был  [GLOB.ooc_allowed ? "включен" : "выключен"].</B></span>")
 
 /proc/toggle_dooc(toggle = null)
 	if(toggle != null)
@@ -134,33 +134,33 @@ GLOBAL_VAR_INIT(normal_ooc_colour, "#002eb8")
 
 
 /client/proc/set_ooc()
-	set name = "Set Player OOC Color"
-	set desc = "Modifies player OOC Color"
-	set category = "Server"
+	set name = "Установить OOC цвет игрока"
+	set desc = "Изменить цвет OOC игрока"
+	set category = "Сервер"
 	if(IsAdminAdvancedProcCall())
 		return
 
-ADMIN_VERB(set_ooc_color, R_FUN, "Set Player OOC Color", "Modifies the global OOC color.", ADMIN_CATEGORY_SERVER)
-	var/newColor = input(user, "Please select the new player OOC color.", "OOC color") as color|null
+ADMIN_VERB(set_ooc_color, R_FUN, "Установить OOC цвет игрока", "Изменить цвет OOC игрока.", ADMIN_CATEGORY_SERVER)
+	var/newColor = input(user, "Пожалуйста, выберите новый цвет OOC для игрока.", "OOC цвет") as color|null
 	if(isnull(newColor))
 		return
 	var/new_color = sanitize_color(newColor)
-	message_admins("[key_name_admin(user)] has set the players' ooc color to [new_color].")
-	log_admin("[key_name_admin(user)] has set the player ooc color to [new_color].")
+	message_admins("[key_name_admin(user)] установил цвет ooc игроков на [new_color].")
+	log_admin("[key_name_admin(user)] установил цвет ooc игроков на [new_color].")
 	GLOB.OOC_COLOR = new_color
 
 /client/proc/reset_ooc()
-	set name = "Reset Player OOC Color"
-	set desc = "Returns player OOC Color to default"
-	set category = "Server"
+	set name = "Сбросить OOC цвет игрока"
+	set desc = "Сбрасывает OOC цвет игрока по умолчанию"
+	set category = "Сервер"
 	if(IsAdminAdvancedProcCall())
 		return
 
-ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC color to default.", ADMIN_CATEGORY_SERVER)
-	if(tgui_alert(user, "Are you sure you want to reset the OOC color of all players?", "Reset Player OOC Color", list("Yes", "No")) != "Yes")
+ADMIN_VERB(reset_ooc_color, R_FUN, "Сбросить OOC цвет игрока", "Сбрасывает OOC цвет игрока по умолчанию.", ADMIN_CATEGORY_SERVER)
+	if(tgui_alert(user, "Вы уверены, что хотите изменить цвет OOC для всех игроков?", "Сбросить OOC цвет игроков", list("Да", "Нет")) != "Да")
 		return
-	message_admins("[key_name_admin(user)] has reset the players' ooc color.")
-	log_admin("[key_name_admin(user)] has reset player ooc color.")
+	message_admins("[key_name_admin(user)] сбросил цвет ooc игроков.")
+	log_admin("[key_name_admin(user)] сбросил цвет ooc игроков.")
 	GLOB.OOC_COLOR = null
 
 //Checks admin notice
@@ -197,21 +197,21 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	browse_messages(null, usr.ckey, null, TRUE)
 
 /client/proc/self_playtime()
-	set name = "View tracked playtime"
+	set name = "Показ наигранного времени"
 	set category = "OOC"
-	set desc = "View the amount of playtime for roles the server has tracked."
+	set desc = "Просмотр количества игрового времени для ролей, отслеживаемого сервером."
 
 	if(!CONFIG_GET(flag/use_exp_tracking))
-		to_chat(usr, span_notice("Sorry, tracking is currently disabled."))
+		to_chat(usr, span_notice("К сожалению, отслеживание в данный момент отключено."))
 		return
 
 	new /datum/job_report_menu(src, usr)
 
 // Ignore verb
 /client/verb/select_ignore()
-	set name = "Ignore"
+	set name = "Игнор"
 	set category = "OOC"
-	set desc ="Ignore a player's messages on the OOC channel"
+	set desc ="Игнорировать сообщения игрока в OOC"
 
 	// Make a list to choose players from
 	var/list/players = list()
@@ -254,7 +254,7 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	// Check if the list is empty
 	if(!length(players))
 		// Express that there are no players we can ignore in chat
-		to_chat(src, span_infoplain("There are no other players you can ignore!"))
+		to_chat(src, span_infoplain("Нет никого, кого вы могли бы игнорировать!"))
 
 		// Stop running
 		return
@@ -263,7 +263,7 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	players = sort_list(players)
 
 	// Request the player to ignore
-	var/selection = tgui_input_list(src, "Select a player", "Ignore", players)
+	var/selection = tgui_input_list(src, "Выберите игрока", "Игнорировать", players)
 
 	// Stop running if we didn't receieve a valid selection
 	if(isnull(selection) || !(selection in players))
@@ -275,7 +275,7 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	// Check if the selected player is on our ignore list
 	if(selection in prefs.ignoring)
 		// Express that the selected player is already on our ignore list in chat
-		to_chat(src, span_infoplain("You are already ignoring [selection]!"))
+		to_chat(src, span_infoplain("Вы игнорируете [selection]!"))
 
 		// Stop running
 		return
@@ -287,24 +287,24 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	prefs.save_preferences()
 
 	// Express that we've ignored the selected player in chat
-	to_chat(src, span_infoplain("You are now ignoring [selection] on the OOC channel."))
+	to_chat(src, span_infoplain("Вы игнорируете [selection] в OOC."))
 
 // Unignore verb
 /client/verb/select_unignore()
-	set name = "Unignore"
+	set name = "Не игнорить"
 	set category = "OOC"
-	set desc = "Stop ignoring a player's messages on the OOC channel"
+	set desc = "Перестаньте игнорировать сообщения игрока в OOC"
 
 	// Check if we've ignored any players
 	if(!length(prefs.ignoring))
 		// Express that we haven't ignored any players in chat
-		to_chat(src, span_infoplain("You haven't ignored any players!"))
+		to_chat(src, span_infoplain("Вы никого не игнорите!"))
 
 		// Stop running
 		return
 
 	// Request the player to unignore
-	var/selection = tgui_input_list(src, "Select a player", "Unignore", prefs.ignoring)
+	var/selection = tgui_input_list(src, "Выбрать игрока", "Не игнорить", prefs.ignoring)
 
 	// Stop running if we didn't receive a selection
 	if(isnull(selection))
@@ -313,7 +313,7 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	// Check if the selected player is not on our ignore list
 	if(!(selection in prefs.ignoring))
 		// Express that the selected player is not on our ignore list in chat
-		to_chat(src, span_infoplain("You are not ignoring [selection]!"))
+		to_chat(src, span_infoplain("Вы не игнорите [selection]!"))
 
 		// Stop running
 		return
@@ -325,7 +325,7 @@ ADMIN_VERB(reset_ooc_color, R_FUN, "Reset Player OOC Color", "Returns player OOC
 	prefs.save_preferences()
 
 	// Express that we've unignored the selected player in chat
-	to_chat(src, span_infoplain("You are no longer ignoring [selection] on the OOC channel."))
+	to_chat(src, span_infoplain("Вы больше не игнорите [selection] в OOC."))
 
 /client/proc/show_previous_roundend_report()
 	set name = "Your Last Round"

@@ -24,13 +24,13 @@ SUBSYSTEM_DEF(statpanels)
 		num_fires++
 		var/datum/map_config/cached = SSmap_vote.next_map_config
 		global_data = list(
-			"Map: [SSmapping.current_map?.map_name || "Loading..."]",
-			cached ? "Next Map: [cached.map_name]" : null,
-			"Round ID: [GLOB.round_id ? GLOB.round_id : "NULL"]",
-			"Server Time: [time2text(world.timeofday, "YYYY-MM-DD hh:mm:ss")]",
-			"Round Time: [ROUND_TIME()]",
-			"Station Time: [station_time_timestamp()]",
-			"Time Dilation: [round(SStime_track.time_dilation_current,1)]% AVG:([round(SStime_track.time_dilation_avg_fast,1)]%, [round(SStime_track.time_dilation_avg,1)]%, [round(SStime_track.time_dilation_avg_slow,1)]%)"
+			"Карта: [SSmapping.current_map?.map_name || "Загрузка..."]",
+			cached ? "Следующая карта: [cached.map_name]" : null,
+			"ID раунда: [GLOB.round_id ? GLOB.round_id : "Нету"]",
+			"Время сервера: [time2text(world.timeofday, "YYYY-MM-DD hh:mm:ss")]",
+			"Время раунда: [ROUND_TIME()]",
+			"Время на станции: [station_time_timestamp()]",
+			"Замедление времени: [round(SStime_track.time_dilation_current,1)]% Среднее:([round(SStime_track.time_dilation_avg_fast,1)]%, [round(SStime_track.time_dilation_avg,1)]%, [round(SStime_track.time_dilation_avg_slow,1)]%)"
 		)
 
 		if(SSshuttle.emergency)
@@ -41,10 +41,10 @@ SUBSYSTEM_DEF(statpanels)
 		if(SSticker.reboot_timer)
 			var/reboot_time = timeleft(SSticker.reboot_timer)
 			if(reboot_time)
-				global_data += "Reboot: [DisplayTimeText(reboot_time, 1)]"
+				global_data += "Перезагрузка: [DisplayTimeText(reboot_time, 1)]"
 		// admin must have delayed round end
 		else if(SSticker.ready_for_reboot)
-			global_data += "Reboot: DELAYED"
+			global_data += "Перезагрузка: ОТЛОЖЕНА"
 
 		src.currentrun = GLOB.clients.Copy()
 		mc_data = null
@@ -57,7 +57,7 @@ SUBSYSTEM_DEF(statpanels)
 		if(!target.stat_panel.is_ready())
 			continue
 
-		if(target.stat_tab == "Status" && num_fires % status_wait == 0)
+		if(target.stat_tab == "Статус" && num_fires % status_wait == 0)
 			set_status_tab(target)
 
 		if(!target.holder)
@@ -104,12 +104,12 @@ SUBSYSTEM_DEF(statpanels)
 #if MIN_COMPILER_VERSION > 515
 	#warn 516 is most certainly out of beta, remove this beta notice if you haven't already
 #endif
-	var/static/list/beta_notice = list("", "You are on BYOND 516, some visual glitches with UIs may be present!", "Please report issues, and switch back to BYOND 515 if things are causing too many issues for you.")
+	var/static/list/beta_notice = list("", "Вы используете BYOND 516, возможно, наблюдаются некоторые визуальные сбои в пользовательском интерфейсе!", "Пожалуйста, сообщайте о проблемах и переключайтесь обратно на BYOND 515, если у вас возникает слишком много проблем.")
 	if(!global_data)//statbrowser hasnt fired yet and we were called from immediate_send_stat_data()
 		return
 	target.stat_panel.send_message("update_stat", list(
 		"global_data" = (target.byond_version < 516) ? global_data : (global_data + beta_notice),
-		"ping_str" = "Ping: [round(target.lastping, 1)]ms (Average: [round(target.avgping, 1)]ms)",
+		"ping_str" = "Пинг: [round(target.lastping, 1)]мс (Средний: [round(target.avgping, 1)]мс)",
 		"other_str" = target.mob?.get_status_tab_items(),
 	))
 
@@ -131,21 +131,21 @@ SUBSYSTEM_DEF(statpanels)
 		var/datum/interview/current_interview = m.open_interviews[ckey]
 		if (current_interview && !current_interview.owner)
 			dc++
-	var/stat_string = "([m.open_interviews.len - dc] online / [dc] disconnected)"
+	var/stat_string = "([m.open_interviews.len - dc] онлайн / [dc] отключён)"
 
 	// Prepare each queued interview
 	var/list/queued = list()
 	for (var/datum/interview/queued_interview in m.interview_queue)
 		queued += list(list(
 			"ref" = REF(queued_interview),
-			"status" = "\[[queued_interview.pos_in_queue]\]: [queued_interview.owner_ckey][!queued_interview.owner ? " (DC)": ""] \[INT-[queued_interview.id]\]"
+			"Статус" = "\[[queued_interview.pos_in_queue]\]: [queued_interview.owner_ckey][!queued_interview.owner ? " (DC)": ""] \[INT-[queued_interview.id]\]"
 		))
 
 	var/list/data = list(
-		"status" = list(
-			"Active:" = "[m.open_interviews.len] [stat_string]",
-			"Queued:" = "[m.interview_queue.len]",
-			"Closed:" = "[m.closed_interviews.len]"),
+		"Статус" = list(
+			"Активный:" = "[m.open_interviews.len] [stat_string]",
+			"Ожидание:" = "[m.interview_queue.len]",
+			"Закрытый:" = "[m.closed_interviews.len]"),
 		"interviews" = queued
 	)
 
@@ -175,13 +175,13 @@ SUBSYSTEM_DEF(statpanels)
 
 /datum/controller/subsystem/statpanels/proc/generate_mc_data()
 	mc_data = list(
-		list("CPU:", world.cpu),
+		list("ЦП:", world.cpu),
 		list("Instances:", "[num2text(world.contents.len, 10)]"),
-		list("World Time:", "[world.time]"),
+		list("Время мира:", "[world.time]"),
 		list("Globals:", GLOB.stat_entry(), text_ref(GLOB)),
 		list("[config]:", config.stat_entry(), text_ref(config)),
 		list("Byond:", "(FPS:[world.fps]) (TickCount:[world.time/world.tick_lag]) (TickDrift:[round(Master.tickdrift,1)]([round((Master.tickdrift/(world.time/world.tick_lag))*100,0.1)]%)) (Internal Tick Usage: [round(MAPTICK_LAST_INTERNAL_TICK_USAGE,0.1)]%)"),
-		list("Master Controller:", Master.stat_entry(), text_ref(Master)),
+		list("Управление контроллерами:", Master.stat_entry(), text_ref(Master)),
 		list("Failsafe Controller:", Failsafe.stat_entry(), text_ref(Failsafe)),
 		list("","")
 	)
@@ -193,26 +193,26 @@ SUBSYSTEM_DEF(statpanels)
 		tracy_present = fexists(tracy_dll)
 	if(tracy_present)
 		if(GLOB.tracy_initialized)
-			mc_data.Insert(2, list(list("byond-tracy:", "Active (reason: [GLOB.tracy_init_reason || "N/A"])")))
+			mc_data.Insert(2, list(list("byond-tracy:", "Активный (причина: [GLOB.tracy_init_reason || "N/A"])")))
 		else if(GLOB.tracy_init_error)
-			mc_data.Insert(2, list(list("byond-tracy:", "Errored ([GLOB.tracy_init_error])")))
+			mc_data.Insert(2, list(list("byond-tracy:", "Ошибочный ([GLOB.tracy_init_error])")))
 		else if(fexists(TRACY_ENABLE_PATH))
-			mc_data.Insert(2, list(list("byond-tracy:", "Queued for next round")))
+			mc_data.Insert(2, list(list("byond-tracy:", "Ожидание следующего раунда")))
 		else
-			mc_data.Insert(2, list(list("byond-tracy:", "Inactive")))
+			mc_data.Insert(2, list(list("byond-tracy:", "Неактивный")))
 	else
-		mc_data.Insert(2, list(list("byond-tracy:", "[tracy_dll] not present")))
+		mc_data.Insert(2, list(list("byond-tracy:", "[tracy_dll] не присутствует")))
 #endif
 	for(var/datum/controller/subsystem/sub_system as anything in Master.subsystems)
 		mc_data[++mc_data.len] = list("\[[sub_system.state_letter()]][sub_system.name]", sub_system.stat_entry(), text_ref(sub_system))
-	mc_data[++mc_data.len] = list("Camera Net", "Cameras: [GLOB.cameranet.cameras.len] | Chunks: [GLOB.cameranet.chunks.len]", text_ref(GLOB.cameranet))
+	mc_data[++mc_data.len] = list("Список камер", "Камеры: [GLOB.cameranet.cameras.len] | Chunks: [GLOB.cameranet.chunks.len]", text_ref(GLOB.cameranet))
 
 ///immediately update the active statpanel tab of the target client
 /datum/controller/subsystem/statpanels/proc/immediate_send_stat_data(client/target)
 	if(!target.stat_panel.is_ready())
 		return FALSE
 
-	if(target.stat_tab == "Status")
+	if(target.stat_tab == "Статус")
 		set_status_tab(target)
 		return TRUE
 
